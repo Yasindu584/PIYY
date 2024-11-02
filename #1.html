@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #gameCanvas {
+            background-color: lightblue;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Set canvas dimensions
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Player settings
+    const player = {
+        x: 50,
+        y: canvas.height / 2 - 25,
+        width: 50,
+        height: 50,
+        color: "red",
+        speed: 5,
+        dx: 0,
+        dy: 0
+    };
+
+    // Obstacle settings
+    const obstacle = {
+        x: canvas.width,
+        y: Math.random() * (canvas.height - 50),
+        width: 50,
+        height: 50,
+        color: "green",
+        speed: 3
+    };
+
+    let isGameOver = false;
+
+    // Draw the player
+    function drawPlayer() {
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    // Draw the obstacle
+    function drawObstacle() {
+        ctx.fillStyle = obstacle.color;
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    }
+
+    // Update player position
+    function updatePlayerPosition() {
+        player.x += player.dx;
+        player.y += player.dy;
+
+        // Boundaries (prevent player from going outside canvas)
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        if (player.y < 0) player.y = 0;
+        if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+    }
+
+    // Update obstacle position
+    function updateObstaclePosition() {
+        obstacle.x -= obstacle.speed;
+        if (obstacle.x + obstacle.width < 0) {
+            obstacle.x = canvas.width;
+            obstacle.y = Math.random() * (canvas.height - obstacle.height);
+        }
+    }
+
+    // Detect collision between player and obstacle
+    function checkCollision() {
+        if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+        ) {
+            isGameOver = true;
+        }
+    }
+
+    // Clear canvas
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Update the game loop
+    function update() {
+        if (isGameOver) {
+            alert("Game Over!");
+            document.location.reload();
+            return;
+        }
+        clearCanvas();
+        drawPlayer();
+        drawObstacle();
+        updatePlayerPosition();
+        updateObstaclePosition();
+        checkCollision();
+        requestAnimationFrame(update);
+    }
+
+    // Handle keyboard inputs for movement
+    function movePlayer(event) {
+        switch (event.key) {
+            case "ArrowRight":
+                player.dx = player.speed;
+                break;
+            case "ArrowLeft":
+                player.dx = -player.speed;
+                break;
+            case "ArrowUp":
+                player.dy = -player.speed;
+                break;
+            case "ArrowDown":
+                player.dy = player.speed;
+                break;
+        }
+    }
+
+    function stopPlayer(event) {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+            player.dx = 0;
+        }
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            player.dy = 0;
+        }
+    }
+
+    // Add event listeners for keyboard movement
+    document.addEventListener("keydown", movePlayer);
+    document.addEventListener("keyup", stopPlayer);
+
+    // Start the game
+    update();
+</script>
+
+</body>
+</html>
